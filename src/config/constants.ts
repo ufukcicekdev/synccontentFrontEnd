@@ -7,6 +7,10 @@ export const API_ENDPOINTS = {
   CHANGE_PASSWORD: `${API_BASE_URL}/api/auth/change-password/`,
   DELETE_ACCOUNT: `${API_BASE_URL}/api/auth/delete-account/`,
   
+  // Google authentication
+  GOOGLE_LOGIN: `${API_BASE_URL}/api/auth/google/login/`,
+  GOOGLE_REGISTER: `${API_BASE_URL}/api/auth/google/register/`,
+  
   // Social platforms
   PLATFORMS: `${API_BASE_URL}/api/social/platforms/`,
   ACCOUNTS: `${API_BASE_URL}/api/social/accounts/`,

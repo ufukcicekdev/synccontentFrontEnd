@@ -117,7 +117,7 @@ export default function OAuthCallbackPage() {
           <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <span className="text-2xl font-bold text-white">SocialSync Pro</span>
+          <span className="text-2xl font-bold text-white">SyncContents</span>
         </div>
 
         {/* Status Icon */}

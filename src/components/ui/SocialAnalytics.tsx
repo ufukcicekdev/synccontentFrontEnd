@@ -26,7 +26,9 @@ interface AnalyticsData {
   video_count?: number
   view_count?: number
   follower_count?: number
+  following_count?: number
   media_count?: number
+  connection_count?: number  // Add LinkedIn connection count
   last_updated: string
 }
 
@@ -164,6 +166,19 @@ export function SocialAnalytics({ accountId, platformName }: SocialAnalyticsProp
           bgColor: 'bg-pink-50'
         }
       )
+    } else if (data.platform_name === 'linkedin') {
+      // Add LinkedIn-specific analytics cards
+      cards.push(
+        {
+          title: 'Connections',
+          value: formatNumber(data.connection_count),
+          icon: Users,
+          color: 'text-blue-600',
+          bgColor: 'bg-blue-50'
+        }
+      )
+      
+      // If we have more LinkedIn metrics in the future, we can add them here
     }
 
     return cards

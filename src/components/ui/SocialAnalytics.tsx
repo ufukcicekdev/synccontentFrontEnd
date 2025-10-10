@@ -12,29 +12,54 @@ import {
   Calendar,
   BarChart3,
   Activity,
-  ExternalLink
+  ExternalLink,
+  LucideIcon
 } from 'lucide-react'
 import { API_ENDPOINTS } from '@/config/constants'
 
 interface AnalyticsData {
   id: number
-  account_id: number  // Add account_id field
+  account_id: number
   platform_name: string
   platform_display_name: string
   platform_username: string
+  last_updated: string
+  
+  // YouTube specific fields
   subscriber_count?: number
   video_count?: number
-  view_count?: number
+  total_view_count?: number
+  
+  // LinkedIn specific fields
+  connection_count?: number
   follower_count?: number
+  post_count?: number
+  profile_views?: number
+  total_organizations?: number
+  
+  // Instagram specific fields
   following_count?: number
   media_count?: number
-  connection_count?: number  // Add LinkedIn connection count
-  last_updated: string
+  
+  // Twitter specific fields
+  tweet_count?: number
+  
+  // Common fields
+  engagement_rate?: number
 }
 
 interface SocialAnalyticsProps {
   accountId?: number
   platformName?: string
+}
+
+interface AnalyticsCard {
+  title: string
+  value: string
+  icon: LucideIcon
+  color: string
+  bgColor: string
+  subtitle?: string
 }
 
 export function SocialAnalytics({ accountId, platformName }: SocialAnalyticsProps) {
@@ -148,9 +173,9 @@ export function SocialAnalytics({ accountId, platformName }: SocialAnalyticsProp
           color: 'text-blue-500',
           bgColor: 'bg-blue-50'
         },
-        {
+        {  
           title: 'Total Views',
-          value: formatNumber(data.view_count),
+          value: formatNumber(data.total_view_count),
           icon: Eye,
           color: 'text-green-500',
           bgColor: 'bg-green-50'
@@ -159,10 +184,24 @@ export function SocialAnalytics({ accountId, platformName }: SocialAnalyticsProp
     } else if (data.platform_name === 'instagram') {
       cards.push(
         {
+          title: 'Followers',
+          value: formatNumber(data.follower_count),
+          icon: Users,
+          color: 'text-pink-500',
+          bgColor: 'bg-pink-50'
+        },
+        {
+          title: 'Following',
+          value: formatNumber(data.following_count),
+          icon: Users,
+          color: 'text-pink-400',
+          bgColor: 'bg-pink-50'
+        },
+        {
           title: 'Media Posts',
           value: formatNumber(data.media_count),
           icon: VideoIcon,
-          color: 'text-pink-500',
+          color: 'text-pink-600',
           bgColor: 'bg-pink-50'
         }
       )
@@ -175,10 +214,44 @@ export function SocialAnalytics({ accountId, platformName }: SocialAnalyticsProp
           icon: Users,
           color: 'text-blue-600',
           bgColor: 'bg-blue-50'
+        },
+        {
+          title: 'Posts',
+          value: formatNumber(data.post_count),
+          icon: VideoIcon,
+          color: 'text-blue-500',
+          bgColor: 'bg-blue-50'
+        },
+        {
+          title: 'Profile Views',
+          value: formatNumber(data.profile_views),
+          icon: Eye,
+          color: 'text-green-500',
+          bgColor: 'bg-green-50'
+        },
+        {
+          title: 'Organizations',
+          value: formatNumber(data.total_organizations),
+          icon: Activity,
+          color: 'text-purple-500',
+          bgColor: 'bg-purple-50'
         }
       )
       
-      // If we have more LinkedIn metrics in the future, we can add them here
+      // Note: Recent engagement metrics will be available when backend provides them
+      // For now, show basic engagement rate if available
+      if (data.engagement_rate) {
+        cards.push(
+          {
+            title: 'Engagement Rate',
+            value: data.engagement_rate.toFixed(1) + '%',
+            icon: TrendingUp,
+            color: 'text-orange-500',
+            bgColor: 'bg-orange-50',
+            subtitle: 'Overall rate'
+          }
+        )
+      }
     }
 
     return cards
@@ -295,6 +368,9 @@ export function SocialAnalytics({ accountId, platformName }: SocialAnalyticsProp
                   <div>
                     <p className="text-sm font-medium text-gray-600">{card.title}</p>
                     <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+                    {(card as AnalyticsCard).subtitle && (
+                      <p className="text-xs text-gray-500 mt-1">{(card as AnalyticsCard).subtitle}</p>
+                    )}
                   </div>
                   <card.icon className={`w-8 h-8 ${card.color}`} />
                 </div>
@@ -310,8 +386,8 @@ export function SocialAnalytics({ accountId, platformName }: SocialAnalyticsProp
                 <div>
                   <span className="text-gray-500">Avg. Views per Video:</span>
                   <span className="ml-2 font-medium text-gray-900">
-                    {data.view_count && data.video_count 
-                      ? formatNumber(Math.round(data.view_count / data.video_count))
+                    {data.total_view_count && data.video_count 
+                      ? formatNumber(Math.round(data.total_view_count / data.video_count))
                       : 'N/A'
                     }
                   </span>

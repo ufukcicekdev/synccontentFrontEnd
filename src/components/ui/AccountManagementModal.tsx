@@ -192,9 +192,12 @@ export function AccountManagementModal({
                             </button>
                           )}
                           <button
-                            onClick={() => onDisconnect(account.id)}
+                            onClick={() => {
+                              // Call the parent disconnect handler which now includes confirmation
+                              onDisconnect(account.id)
+                            }}
                             className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                            title="Disconnect"
+                            title="Disconnect Account"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

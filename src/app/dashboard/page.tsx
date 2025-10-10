@@ -29,6 +29,7 @@ import { useAuthStore } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/Button'
 import { OAuthErrorModal } from '@/components/ui/OAuthErrorModal'
 import { AccountManagementModal } from '@/components/ui/AccountManagementModal'
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal'
 import { SocialAnalytics } from '@/components/ui/SocialAnalytics'
 import { API_ENDPOINTS } from '@/config/constants'
 
@@ -72,6 +73,20 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [oauthError, setOauthError] = useState<{platform: string, error: string} | null>(null)
   const [accountModal, setAccountModal] = useState<{platform: SocialPlatform, accounts: ConnectedAccount[]} | null>(null)
+  const [notificationModal, setNotificationModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    type: 'success' | 'error' | 'warning'
+  } | null>(null)
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    onConfirm: () => void
+    accountId?: number
+    platformName?: string
+  } | null>(null)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
@@ -185,6 +200,22 @@ export default function DashboardPage() {
   }
 
   const handleDisconnectAccount = async (accountId: number) => {
+    // Find the account to get platform info
+    const account = connectedAccounts.find(acc => acc.id === accountId)
+    const platformName = account?.platform?.display_name || 'Social Media'
+    const username = account?.platform_username || 'account'
+    
+    setConfirmationModal({
+      isOpen: true,
+      title: `Disconnect ${platformName} Account`,
+      message: `Are you sure you want to disconnect @${username} from ${platformName}? This will remove the account from your dashboard and you'll need to reconnect it to manage content.`,
+      accountId,
+      platformName,
+      onConfirm: () => performDisconnectAccount(accountId)
+    })
+  }
+
+  const performDisconnectAccount = async (accountId: number) => {
     try {
       const token = localStorage.getItem('access_token')
       if (!token) return
@@ -198,11 +229,40 @@ export default function DashboardPage() {
       })
       
       if (response.ok) {
-        // Refresh connected accounts
-        fetchPlatformsAndAccounts()
+        // Refresh connected accounts first
+        await fetchPlatformsAndAccounts()
+        
+        // Close confirmation modal after data is updated
+        setConfirmationModal(null)
+        
+        // Show success notification
+        setNotificationModal({
+          isOpen: true,
+          title: 'Account Disconnected',
+          message: 'Your account has been successfully disconnected.',
+          type: 'success'
+        })
+        
+      } else {
+        // Handle error case
+        const errorData = await response.json()
+        setConfirmationModal(null)
+        setNotificationModal({
+          isOpen: true,
+          title: 'Failed to Disconnect',
+          message: errorData.error || 'Failed to disconnect account. Please try again.',
+          type: 'error'
+        })
       }
     } catch (error) {
       console.error('Error disconnecting account:', error)
+      setConfirmationModal(null)
+      setNotificationModal({
+        isOpen: true,
+        title: 'Network Error',
+        message: 'A network error occurred while disconnecting the account. Please try again.',
+        type: 'error'
+      })
     }
   }
 
@@ -218,6 +278,24 @@ export default function DashboardPage() {
   const getConnectedAccounts = (platformName: string) => {
     return connectedAccounts.filter(account => account.platform.name === platformName)
   }
+
+  // Auto-update AccountManagementModal when connectedAccounts changes
+  useEffect(() => {
+    if (accountModal) {
+      const platformAccounts = connectedAccounts.filter(acc => acc.platform.name === accountModal.platform.name)
+      
+      // If no accounts left for this platform, close the modal
+      if (platformAccounts.length === 0) {
+        setAccountModal(null)
+      } else {
+        // Update the modal with current accounts
+        setAccountModal(prev => prev ? {
+          ...prev,
+          accounts: platformAccounts
+        } : null)
+      }
+    }
+  }, [connectedAccounts, accountModal])
 
   const getConnectedAccount = (platformName: string) => {
     return connectedAccounts.find(account => account.platform.name === platformName)
@@ -673,6 +751,32 @@ export default function DashboardPage() {
         onDisconnect={handleDisconnectAccount}
         onReconnect={handleConnectPlatform}
         onAddAccount={handleConnectPlatform}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={!!confirmationModal}
+        onClose={() => setConfirmationModal(null)}
+        onConfirm={confirmationModal?.onConfirm || (() => {})}
+        title={confirmationModal?.title || ''}
+        message={confirmationModal?.message || ''}
+        confirmText="Disconnect Account"
+        cancelText="Keep Connected"
+        type="warning"
+      />
+
+      {/* Notification Modal */}
+      <ConfirmationModal
+        isOpen={!!notificationModal}
+        onClose={() => setNotificationModal(null)}
+        onConfirm={() => setNotificationModal(null)}
+        title={notificationModal?.title || ''}
+        message={notificationModal?.message || ''}
+        confirmText="OK"
+        cancelText=""
+        type={notificationModal?.type === 'error' ? 'danger' : 
+             notificationModal?.type === 'success' ? 'success' : 
+             notificationModal?.type === 'warning' ? 'warning' : 'info'}
       />
     </div>
   )

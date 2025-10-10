@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001'
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/api/auth/login/`,
@@ -31,6 +31,20 @@ export const API_ENDPOINTS = {
   REFRESH_ANALYTICS: (accountId: number) => `${API_BASE_URL}/api/social/analytics/${accountId}/refresh/`,
   DETAILED_ANALYTICS: (accountId: number) => `${API_BASE_URL}/api/social/analytics/${accountId}/detailed/`,
   DEBUG_ACCOUNT: (accountId: number) => `${API_BASE_URL}/api/social/debug/${accountId}/`,
+  
+  // LinkedIn specific endpoints
+  LINKEDIN_ORGANIZATIONS: (accountId: number) => `${API_BASE_URL}/api/social/linkedin/${accountId}/organizations/`,
+  LINKEDIN_POSTS: (accountId: number) => `${API_BASE_URL}/api/social/linkedin/${accountId}/posts/`,
+  LINKEDIN_POST_DETAIL: (accountId: number, postId: string) => `${API_BASE_URL}/api/social/linkedin/${accountId}/posts/${postId}/`,
+  LINKEDIN_UPDATE_POST: (accountId: number, postId: string) => `${API_BASE_URL}/api/social/linkedin/${accountId}/posts/${postId}/update/`,
+  LINKEDIN_DELETE_POST: (accountId: number, postId: string) => `${API_BASE_URL}/api/social/linkedin/${accountId}/posts/${postId}/delete/`,
+  LINKEDIN_CREATE_POST: (accountId: number) => `${API_BASE_URL}/api/social/linkedin/${accountId}/create-post/`,
+  
+  // Instagram specific endpoints
+  INSTAGRAM_MEDIA: (accountId: number) => `${API_BASE_URL}/api/social/instagram/${accountId}/media/`,
+  INSTAGRAM_MEDIA_DETAIL: (accountId: number, mediaId: string) => `${API_BASE_URL}/api/social/instagram/${accountId}/media/${mediaId}/`,
+  INSTAGRAM_UPDATE_MEDIA: (accountId: number, mediaId: string) => `${API_BASE_URL}/api/social/instagram/${accountId}/media/${mediaId}/update/`,
+  INSTAGRAM_DELETE_MEDIA: (accountId: number, mediaId: string) => `${API_BASE_URL}/api/social/instagram/${accountId}/media/${mediaId}/delete/`,
   
   // Video management
   VIDEOS: (accountId: number) => `${API_BASE_URL}/api/social/videos/${accountId}/`,
